@@ -1,12 +1,26 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
-
+const axios = require("axios");
+const markdownGenerator = require('./Utils/markdownGenerator.js')
 inquirer.prompt([
+    
+    {
+        type:"input",
+        message:"What is your GitHub user name?",
+        name:"github"
+    },
+    {
+        type:"input",
+        message:"What is your email?",
+        name:"webmail"
+    },
+
     {
         type:"input",
         message:"What is the title of your Read-Me?",
         name:"title"
     },
+    
 
     {
         type:"input",
@@ -16,7 +30,7 @@ inquirer.prompt([
 
     {
         type:"list",
-        message:"what type of liscense do you want",
+        message:"what type of liscense do you want?",
         name:"license",
         choices:[
             "MIT",
@@ -27,40 +41,84 @@ inquirer.prompt([
 
     {
         type:"input",
-        message:"information on how to use the repo",
+        message:"information on how to use the repo?",
         name:"usage"
     },
 
     {
         type:"input",
-        message:"information on contributing to the repo",
+        message:"information on contributing to the repo?",
         name:"contributing"
+    },
+
+    
+
+    {
+        type:"input",
+        message:"What command does the user need to install the dependacies?",
+        name:"installation"
     },
 
     {
         type:"input",
-        message:"What is your email",
-        name:"email"
-    },
+        message:"What command to run the test",
+        name:"test"
+    }
 
-//     {
-// typ
-//     }
 ])
 .then(function(answers){
+    axios.get(`https://api.github.com/users/${answers.github}`)
+    .then(function({data}){
 
-    // query github with axios
+        fs.writeFile("new-Read-me.md",markdownGenerator({...answers, ...data}), err=>{
+            if (err) throw err;
+            console.log('...saving ')
+        })
+        
+        
+        
+//         const data =`   
+//         # ${answers.title}
+        
+//         ## Description
+// ${answers.description}
+
+// ## Table of contents
+// 1. Instillation
+// 2. Usage
+// 3. Liscense
+// 4. Contributing
+// 5. Test
+// 6. Questions
+
+// ## Instilation
+//     ${answers.installation}
     
+// ## Usage
+// ${answers.usage}
 
-    const data = `
-    # ${answers.title}
+// ## License
+// This project is licensed under the ${answers.license} license.
 
-    ## Description
-    ${answers.description}
-    `
+// ## Contributing
+// ${answers.contributing}
 
-    fs.writeFile("new-Read-me.md", data, err => err ? console.log(err) : null)
-    
+// ## Test
+// To run test, run the following command:
+
+//     ${answers.test}
+
+// ## Questions
+// ![profile picture of ${answers.github}] (${response.avatar_url})
+
+// if you have any questions about the repo, open an issue or contact ${response.url} directly at ${answers.email}.
+// `
+
+// fs.writeFile("new-Read-me.md", data, err => err ? console.log(err) : null)
+// })
+})
+
+})
 //     fs.writeFile("new-Read-me.md",`${answers.title}
 // `, err => err ? console.log(err) : null)
 
@@ -104,5 +162,3 @@ inquirer.prompt([
 // fs.appendFile("new-Read-me.md",`${answers.contributing}
 // `, err => err ? console.log(err) : null)
 
-
-})
